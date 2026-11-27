@@ -246,29 +246,48 @@ function renderTable(preserveScroll) {
 
 function syncFromServer() {
   if (!API_URL || !API_URL.startsWith('http')) return;
+  if (!navigator.onLine) {
+    setStatus('Нет сети\nГрафик не обновляется', true);
+    return;
+  }
   setStatus('Синхронизация...');
   fetch(`${API_URL}?api=1&t=${Date.now()}`, { redirect: 'follow' })
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(data => {
       if (data && data.cells) {
         store.cells = data.cells || store.cells;
-        store.edited = data.edited || store.edited;
         saveLocalStore();
         renderTable(true);
       }
       setStatus('В сети');
     })
-    .catch(() => setStatus('Офлайн-режим', true));
+    .catch(() => setStatus('Нет сети\nГрафик не обновляется', true));
 }
 
 function initApp() {
   loadLocalStore();
   renderTable(false);
   syncFromServer();
+
+  window.addEventListener('online', () => {
+    syncFromServer();
+  });
+
+  window.addEventListener('offline', () => {
+    setStatus('Нет сети\nГрафик не обновляется', true);
+  });
+
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && navigator.onLine) syncFromServer();
+    if (document.visibilityState === 'visible') {
+      if (navigator.onLine) syncFromServer();
+      else setStatus('Нет сети\nГрафик не обновляется', true);
+    }
   });
 }
+
 
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', initApp);
