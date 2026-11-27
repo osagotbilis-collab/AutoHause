@@ -333,13 +333,36 @@ function initApp() {
     checkNewDayAndShift();
   });
 
+      function disableEditOnExit() {
+    if (document.activeElement && document.activeElement.isContentEditable) {
+      document.activeElement.blur();
+    }
+    if (isEditEnabled) {
+      isEditEnabled = false;
+      const btn = document.getElementById('editToggleBtn');
+      const group = document.getElementById('editControlGroup');
+      if (btn) {
+        btn.setAttribute('aria-checked', 'false');
+        btn.classList.remove('active');
+      }
+      if (group) group.classList.remove('active');
+      renderTable(true);
+    }
+  }
+
+  window.addEventListener('pagehide', disableEditOnExit);
+
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
+    if (document.visibilityState === 'hidden') {
+      disableEditOnExit();
+    } else if (document.visibilityState === 'visible') {
       checkNewDayAndShift();
       if (navigator.onLine) syncFromServer();
       else setStatus('Нет сети\nГрафик не обновляется', true);
     }
   });
+
+
 }
 
 if (document.readyState === 'loading') {
