@@ -1,9 +1,9 @@
-const CACHE_NAME = 'autohause-offline-v8';
+const CACHE_NAME = 'autohause-offline-v9';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
-      './app.js?v=3'
+      './app.js?v=4'
 
 ];
 
