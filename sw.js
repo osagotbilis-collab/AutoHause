@@ -1,4 +1,4 @@
-const CACHE_NAME = 'autohause-offline-v6';
+const CACHE_NAME = 'autohause-offline-v7';
 const ASSETS = [
   './',
   './index.html',
