@@ -197,11 +197,11 @@ function renderTable(preserveScroll) {
 
   table.appendChild(theadRow);
 
-  TIME_SLOTS.forEach(slot => {
+    TIME_SLOTS.forEach(slot => {
     const tr = document.createElement('tr');
 
     const timeTd = document.createElement('td');
-    timeTd.textContent = slot;
+    timeTd.textContent = slot.label;
     tr.appendChild(timeTd);
 
     visibleCols.forEach(col => {
@@ -210,11 +210,11 @@ function renderTable(preserveScroll) {
 
       if (col.isSunday) {
         td.classList.add('sunday-col');
-        tr.appendChild(td);
-        return;
+      } else if (slot.isOffHours) {
+        td.classList.add('off-hours-col');
       }
 
-      const cellKey = `${col.key}|${slot}`;
+      const cellKey = `${col.key}|${slot.label}`;
       const val = store.cells[cellKey] || '';
       td.textContent = val;
 
@@ -232,6 +232,7 @@ function renderTable(preserveScroll) {
 
     table.appendChild(tr);
   });
+
 
   setTimeout(() => {
     if (!scroller) return;
