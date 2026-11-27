@@ -178,14 +178,15 @@
     th.archive-col .th-weekday { color: #5f6368; }
     td.archive-col { background-color: #f8f9fa; color: #5f6368; }
 
-    /* Воскресенье — выходной (песочно-бежевый оттенок в стиль таблицы) */
-    th.sunday-col { background-color: #ede0c4; }
-    th.sunday-col .th-weekday { color: #4a3b22; }
-    th.sunday-col .th-date { color: #6e5a38; }
-    td.sunday-col {
-      background-color: #f7efe0;
-      user-select: none;
+        /* Воскресенье и нерабочее время — единый спокойный приглушённо-розовый оттенок */
+    th.sunday-col { background-color: #f2e2e2; }
+    th.sunday-col .th-weekday { color: #5c3333; }
+    th.sunday-col .th-date { color: #7d4e4e; }
+    td.sunday-col,
+    td.off-hours-col {
+      background-color: #f7ecec;
     }
+
 
     
 
@@ -277,7 +278,8 @@
     <button type="button" id="archiveBtn" class="archive-btn" onclick="toggleArchive()">АРХИВ</button>
   </div>
 
-    <script src="app.js?v=5"></script>
+      <script src="app.js?v=7"></script>
+
 
 </body>
 </html>
