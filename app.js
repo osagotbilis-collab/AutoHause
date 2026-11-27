@@ -1,5 +1,5 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbx2gvBUOQki92yBN6M_aF0oySYs2C-wS-q8vFaM_eH_JymvnAo0dKfzy1r8s5VKgIa9/exec';
-const STORAGE_KEY = 'auto_schedule_data_v5';
+const STORAGE_KEY = 'auto_schedule_data_v6';
 
 const WEEKDAYS_RU = [
   'Воскресенье',
