@@ -1,9 +1,10 @@
-const CACHE_NAME = 'autohause-offline-v7';
+const CACHE_NAME = 'autohause-offline-v8';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
-  './app.js?v=2'
+      './app.js?v=3'
+
 ];
 
 self.addEventListener('install', event => {
