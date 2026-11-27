@@ -3,7 +3,7 @@ const ASSETS = [
   './',
   './index.html',
   './app.js',
-      './app.js?v=5'
+      './app.js?v=6'
 
 ];
 
