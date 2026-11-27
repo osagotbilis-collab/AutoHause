@@ -226,7 +226,7 @@ function renderTable(preserveScroll) {
       scroller.scrollLeft = prevScroll;
     } else if (todayColIndex > 0) {
       const headers = table.querySelectorAll('tr:first-child th');
-      const stickyW = headers ? headers.offsetWidth : 106;
+      const stickyW = headers ? headers.offsetWidth : 88;
       const targetTh = headers[todayColIndex];
       if (targetTh) {
         scroller.scrollLeft = Math.max(0, targetTh.offsetLeft - stickyW);
