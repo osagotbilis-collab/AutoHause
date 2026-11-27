@@ -24,14 +24,13 @@
       padding: 4px 6px 10px;
       min-height: 36px;
     }
-        #syncStatus {
+    #syncStatus {
       font-size: 12px;
       line-height: 1.2;
       color: #1a73e8;
       font-weight: bold;
       white-space: pre;
     }
-
 
     .edit-control-group {
       display: inline-flex;
@@ -139,7 +138,7 @@
       line-height: 1.2;
     }
 
-        td {
+    td {
       height: 74px;
       min-height: 74px;
       font-size: 15px;
@@ -148,17 +147,17 @@
       vertical-align: top;
     }
 
-
     td:first-child, th:first-child {
       position: sticky;
       left: 0;
       width: 82px;
       min-width: 82px;
       max-width: 82px;
-      padding: 6px 4px;
+      padding: 6px 2px;
       border-right: 2px solid #5f6368;
       text-align: center;
       vertical-align: middle;
+      white-space: nowrap;
     }
     td:first-child {
       z-index: 3;
@@ -178,7 +177,7 @@
     th.archive-col .th-weekday { color: #5f6368; }
     td.archive-col { background-color: #f8f9fa; color: #5f6368; }
 
-        /* Воскресенье и нерабочее время — единый спокойный приглушённо-розовый оттенок */
+    /* Воскресенье и нерабочее время — единый спокойный приглушённо-розовый оттенок */
     th.sunday-col { background-color: #f2e2e2; }
     th.sunday-col .th-weekday { color: #5c3333; }
     th.sunday-col .th-date { color: #7d4e4e; }
@@ -186,9 +185,6 @@
     td.off-hours-col {
       background-color: #f7ecec;
     }
-
-
-    
 
     td[contenteditable="true"]:focus {
       outline: 2px solid #1a73e8;
@@ -198,11 +194,11 @@
     }
 
     .archive-bar {
-      margin-top: 12px;
+      margin-top: 14px;
       display: flex;
       justify-content: center;
     }
-        .archive-btn {
+    .archive-btn {
       width: auto;
       min-width: 180px;
       padding: 11px 28px;
@@ -227,8 +223,7 @@
       color: #ffffff;
     }
 
-
-        @media (max-width: 600px) {
+    @media (max-width: 600px) {
       body {
         padding: calc(8px + env(safe-area-inset-top)) 4px calc(16px + env(safe-area-inset-bottom));
         background: #ffffff;
@@ -254,7 +249,6 @@
         white-space: nowrap;
       }
     }
-
   </style>
 </head>
 <body>
@@ -278,8 +272,6 @@
     <button type="button" id="archiveBtn" class="archive-btn" onclick="toggleArchive()">АРХИВ</button>
   </div>
 
-      <script src="app.js?v=7"></script>
-
-
+  <script src="app.js?v=8"></script>
 </body>
 </html>
