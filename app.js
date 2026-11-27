@@ -21,7 +21,7 @@ let store = {
   cells: {}
 };
 
-// Генерация интервалов времени строго с 08.00-08.30 до 19.30-20.00
+// Генерация интервалов с 08.00 до 20.00 с пометкой нерабочих часов
 function generateTimeSlots() {
   const slots = [];
   const pad = n => String(n).padStart(2, '0');
@@ -34,11 +34,19 @@ function generateTimeSlots() {
     const next = minutes + 30;
     const endH = Math.floor(next / 60);
     const endM = next % 60;
-    slots.push(`${pad(startH)}.${pad(startM)}-${pad(endH)}.${pad(endM)}`);
+
+    // Нерабочее время: до 09:00, обед 12:00-13:00, после 18:00
+    const isOffHours = (minutes < 9 * 60) || (minutes >= 12 * 60 && minutes < 13 * 60) || (minutes >= 18 * 60);
+
+    slots.push({
+      label: `${pad(startH)}.${pad(startM)}-${pad(endH)}.${pad(endM)}`,
+      isOffHours: isOffHours
+    });
     minutes = next;
   }
   return slots;
 }
+
 
 const TIME_SLOTS = generateTimeSlots();
 
