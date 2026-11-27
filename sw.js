@@ -1,9 +1,9 @@
-const CACHE_NAME = 'autohause-offline-v4
+const CACHE_NAME = 'autohause-offline-v5';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
-  './app.js?v=1'
+  './app.js?v=2'
 ];
 
 self.addEventListener('install', event => {
@@ -26,7 +26,9 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const url = event.request.url;
-  if (url.includes('://google.com') || url.includes('://googleusercontent.com')) {
+      if (url.includes('/macros/') || url.includes('googleusercontent.com')) {
+
+
     return;
   }
 
