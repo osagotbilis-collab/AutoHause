@@ -1,1 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="График">
+  <title>График</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
+    body {
+      margin: 0;
+      padding: calc(12px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom));
+      background: #f8f9fa;
+      color: #202124;
+    }
 
+    .top-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 6px 10px;
+      min-height: 36px;
+    }
+    #syncStatus {
+      font-size: 13px;
+      line-height: 1.2;
+      color: #1a73e8;
+      font-weight: bold;
+    }
+
+    .edit-control-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .switch-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #3c4043;
+      letter-spacing: 0.3px;
+      user-select: none;
+    }
+    .edit-control-group.active .switch-label { color: #1a73e8; }
+    .edit-switch-wrap {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      padding: 4px 0;
+    }
+    .switch-track {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      background: #bdc1c6;
+      border-radius: 24px;
+      transition: background 0.2s ease;
+    }
+    .edit-switch-wrap.active .switch-track { background: #1a73e8; }
+    .switch-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+      transition: transform 0.2s ease;
+    }
+    .edit-switch-wrap.active .switch-thumb { transform: translateX(18px); }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .scroll-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 2px solid #5f6368;
+      position: relative;
+      background: #ffffff;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: max-content;
+      font-size: 14px;
+    }
+
+    th, td {
+      border-right: 1px solid #80868b;
+      border-bottom: 1px solid #80868b;
+      padding: 6px 8px;
+      width: 178px;
+      min-width: 178px;
+      max-width: 178px;
+      white-space: pre-line;
+      word-break: break-word;
+      background: #ffffff;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f1f3f4;
+      color: #202124;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      border-bottom: 2px solid #5f6368;
+      text-align: center;
+      height: 52px;
+      padding: 5px 6px;
+    }
+
+    .th-weekday {
+      display: block;
+      font-size: 15px;
+      font-weight: bold;
+      color: #202124;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+    .th-date {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #5f6368;
+      line-height: 1.2;
+    }
+
+    td {
+      height: 68px;
+      min-height: 68px;
+      line-height: 1.38;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    td:first-child, th:first-child {
+      position: sticky;
+      left: 0;
+      width: 106px;
+      min-width: 106px;
+      max-width: 106px;
+      padding: 6px 4px;
+      border-right: 2px solid #5f6368;
+      text-align: center;
+      vertical-align: middle;
+    }
+    td:first-child {
+      z-index: 3;
+      font-weight: bold;
+      font-size: 13px;
+      background-color: #fbf5e6;
+    }
+    th:first-child {
+      z-index: 4;
+      background-color: #f1f3f4;
+      color: #202124;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    th.archive-col { background-color: #e8eaed; }
+    th.archive-col .th-weekday { color: #5f6368; }
+    td.archive-col { background-color: #f8f9fa; color: #5f6368; }
+
+    /* Воскресенье — выходной (песочно-бежевый оттенок в стиль таблицы) */
+    th.sunday-col { background-color: #ede0c4; }
+    th.sunday-col .th-weekday { color: #4a3b22; }
+    th.sunday-col .th-date { color: #6e5a38; }
+    td.sunday-col {
+      background-color: #f7efe0;
+      user-select: none;
+    }
+
+    td.edited-cell { background-color: #d4edda !important; }
+
+    td[contenteditable="true"]:focus {
+      outline: 2px solid #1a73e8;
+      outline-offset: -2px;
+      background-color: #ffffff !important;
+      font-size: 16px;
+    }
+
+    .archive-bar {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+    }
+    .archive-btn {
+      width: 100%;
+      max-width: 440px;
+      padding: 13px 20px;
+      background-color: #e8eef5;
+      color: #2c435c;
+      border: 1px solid #c6d4e3;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.15s ease;
+    }
+    .archive-btn:active {
+      background-color: #d8e3ef;
+    }
+    .archive-btn.active {
+      background-color: #dce6f2;
+      border-color: #9cb5cf;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: calc(8px + env(safe-area-inset-top)) 4px calc(16px + env(safe-area-inset-bottom));
+        background: #ffffff;
+      }
+      .section {
+        border: none;
+        border-radius: 0;
+        padding: 0;
+      }
+      th, td {
+        width: 172px;
+        min-width: 172px;
+        max-width: 172px;
+      }
+      td:first-child, th:first-child {
+        width: 98px;
+        min-width: 98px;
+        max-width: 98px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-status-row">
+    <div id="syncStatus">Готово к работе</div>
+    <div id="editControlGroup" class="edit-control-group">
+      <span class="switch-label">РЕДАКТИРОВАНИЕ</span>
+      <div id="editToggleBtn" class="edit-switch-wrap" role="switch" aria-checked="false" onclick="toggleEditMode()">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="scroll-container" id="scrollContainer">
+      <table id="scheduleTable"></table>
+    </div>
+  </div>
+
+  <div class="archive-bar">
+    <button type="button" id="archiveBtn" class="archive-btn" onclick="toggleArchive()">АРХИВ</button>
+  </div>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>
