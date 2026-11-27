@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbx2gvBUOQki92yBN6M_aF0oySYs2C-wS-q8vFaM_eH_JymvnAo0dKfzy1r8s5VKgIa9/exec';
+const API_URL = 'https://google.com';
 const STORAGE_KEY = 'auto_schedule_data_v5';
 
 const WEEKDAYS_RU = [
@@ -13,7 +13,7 @@ const WEEKDAYS_RU = [
 
 let isEditEnabled = false;
 let showArchive = false;
-let futureDaysLimit = 60; // Начальный запас дней вперёд (растёт бесконечно при прокрутке)
+let futureDaysLimit = 60;
 let currentTodayKey = '';
 let isAppendingCols = false;
 
@@ -46,7 +46,6 @@ function generateTimeSlots() {
   }
   return slots;
 }
-
 
 const TIME_SLOTS = generateTimeSlots();
 
@@ -205,7 +204,7 @@ function renderTable(preserveScroll) {
 
   table.appendChild(theadRow);
 
-    TIME_SLOTS.forEach(slot => {
+  TIME_SLOTS.forEach(slot => {
     const tr = document.createElement('tr');
 
     const timeTd = document.createElement('td');
@@ -241,7 +240,6 @@ function renderTable(preserveScroll) {
     table.appendChild(tr);
   });
 
-
   setTimeout(() => {
     if (!scroller) return;
     if (preserveScroll) {
@@ -258,7 +256,6 @@ function renderTable(preserveScroll) {
   }, 30);
 }
 
-// Проверка наступления нового утра (смены даты)
 function checkNewDayAndShift() {
   const actualTodayKey = toDateKey(getTodayDate());
   if (currentTodayKey && actualTodayKey !== currentTodayKey) {
@@ -272,14 +269,12 @@ function checkNewDayAndShift() {
   }
 }
 
-// Бесконечная подгрузка будущих дат при прокрутке вправо
 function setupInfiniteScroll() {
   const scroller = document.getElementById('scrollContainer');
   if (!scroller) return;
 
   scroller.addEventListener('scroll', () => {
     if (isAppendingCols) return;
-    // Не перерисовываем во время активного набора текста в ячейке
     if (document.activeElement && document.activeElement.isContentEditable) return;
 
     const distanceToRight = scroller.scrollWidth - (scroller.scrollLeft + scroller.clientWidth);
@@ -318,9 +313,11 @@ function initApp() {
   loadLocalStore();
   renderTable(false);
   setupInfiniteScroll();
+  if (!navigator.onLine) {
+    setStatus('Нет сети\nГрафик не обновляется', true);
+  }
   syncFromServer();
 
-  // Каждую минуту проверяем, не наступил ли новый день (утро)
   setInterval(checkNewDayAndShift, 60000);
 
   window.addEventListener('online', () => {
