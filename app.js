@@ -122,7 +122,7 @@ function toggleArchive() {
 function saveCellChange(cellKey, newValue, cellEl) {
   store.cells[cellKey] = newValue;
   store.edited[cellKey] = Date.now() + 14 * 24 * 60 * 60 * 1000;
-  if (cellEl) cellEl.classList.add('edited-cell');
+  
   saveLocalStore();
   setStatus('Сохранение...');
 
@@ -201,9 +201,7 @@ function renderTable(preserveScroll) {
       const val = store.cells[cellKey] || '';
       td.textContent = val;
 
-      if (store.edited[cellKey] && store.edited[cellKey] > nowMs) {
-        td.classList.add('edited-cell');
-      }
+     
 
       if (isEditEnabled) {
         td.contentEditable = 'true';
