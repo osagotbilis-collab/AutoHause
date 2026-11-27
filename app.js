@@ -119,10 +119,8 @@ function toggleArchive() {
   renderTable(false);
 }
 
-function saveCellChange(cellKey, newValue, cellEl) {
+function saveCellChange(cellKey, newValue) {
   store.cells[cellKey] = newValue;
-  store.edited[cellKey] = Date.now() + 14 * 24 * 60 * 60 * 1000;
-  
   saveLocalStore();
   setStatus('Сохранение...');
 
@@ -133,12 +131,25 @@ function saveCellChange(cellKey, newValue, cellEl) {
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'updateCell', key: cellKey, value: newValue })
     })
-      .then(() => setStatus('Сохранено'))
-      .catch(() => setStatus('Сохранено локально (нет сети)', true));
+      .then(() => {
+        setStatus('Сохранено');
+        setTimeout(() => {
+          const el = document.getElementById('syncStatus');
+          if (el && el.textContent === 'Сохранено') {
+            if (navigator.onLine) {
+              setStatus('В сети');
+            } else {
+              setStatus('Нет сети\nГрафик не обновляется', true);
+            }
+          }
+        }, 1500);
+      })
+      .catch(() => setStatus('Нет сети\nГрафик не обновляется', true));
   } else {
-    setStatus('Сохранено локально');
+    setStatus('Сохранено');
   }
 }
+
 
 function renderTable(preserveScroll) {
   const scroller = document.getElementById('scrollContainer');
