@@ -21,8 +21,9 @@ let store = {
 function generateTimeSlots() {
   const slots = [];
   const pad = n => String(n).padStart(2, '0');
-  let minutes = 7 * 60 + 30;
-  const endMinutes = 21 * 60;
+  let minutes = 8 * 60;
+const endMinutes = 20 * 60;
+
 
   while (minutes < endMinutes) {
     const startH = Math.floor(minutes / 60);
