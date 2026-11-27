@@ -1,5 +1,5 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbx2gvBUOQki92yBN6M_aF0oySYs2C-wS-q8vFaM_eH_JymvnAo0dKfzy1r8s5VKgIa9/exec';
-const STORAGE_KEY = 'auto_schedule_data_v4';
+const API_URL = 'СЮДА_ВСТАВЬТЕ_ВАШУ_ССЫЛКУ_ИЗ_GOOGLE_APPS_SCRIPT';
+const STORAGE_KEY = 'auto_schedule_data_v5';
 
 const WEEKDAYS_RU = [
   'Воскресенье',
@@ -13,17 +13,20 @@ const WEEKDAYS_RU = [
 
 let isEditEnabled = false;
 let showArchive = false;
+let futureDaysLimit = 60; // Начальный запас дней вперёд (растёт бесконечно при прокрутке)
+let currentTodayKey = '';
+let isAppendingCols = false;
+
 let store = {
-  cells: {},
-  edited: {}
+  cells: {}
 };
 
+// Генерация интервалов времени строго с 08.00-08.30 до 19.30-20.00
 function generateTimeSlots() {
   const slots = [];
   const pad = n => String(n).padStart(2, '0');
   let minutes = 8 * 60;
-const endMinutes = 20 * 60;
-
+  const endMinutes = 20 * 60;
 
   while (minutes < endMinutes) {
     const startH = Math.floor(minutes / 60);
@@ -49,12 +52,17 @@ function formatDateDots(date) {
   return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
 }
 
-function getDateColumns() {
+function getTodayDate() {
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function getDateColumns() {
+  const today = getTodayDate();
+  currentTodayKey = toDateKey(today);
   const cols = [];
 
-  for (let offset = -14; offset <= 21; offset++) {
+  for (let offset = -30; offset <= futureDaysLimit; offset++) {
     const d = new Date(today);
     d.setDate(today.getDate() + offset);
     const dayOfWeek = d.getDay();
@@ -77,8 +85,7 @@ function loadLocalStore() {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
         store = {
-          cells: parsed.cells || {},
-          edited: parsed.edited || {}
+          cells: parsed.cells || {}
         };
       }
     }
@@ -151,7 +158,6 @@ function saveCellChange(cellKey, newValue) {
   }
 }
 
-
 function renderTable(preserveScroll) {
   const scroller = document.getElementById('scrollContainer');
   const prevScroll = scroller ? scroller.scrollLeft : 0;
@@ -160,7 +166,6 @@ function renderTable(preserveScroll) {
 
   const allCols = getDateColumns();
   const visibleCols = showArchive ? allCols : allCols.filter(c => !c.isPast);
-  const nowMs = Date.now();
 
   table.innerHTML = '';
 
@@ -213,13 +218,11 @@ function renderTable(preserveScroll) {
       const val = store.cells[cellKey] || '';
       td.textContent = val;
 
-     
-
       if (isEditEnabled) {
         td.contentEditable = 'true';
         td.addEventListener('blur', () => {
           if (td.textContent !== val) {
-            saveCellChange(cellKey, td.textContent, td);
+            saveCellChange(cellKey, td.textContent);
           }
         });
       }
@@ -236,13 +239,47 @@ function renderTable(preserveScroll) {
       scroller.scrollLeft = prevScroll;
     } else if (todayColIndex > 0) {
       const headers = table.querySelectorAll('tr:first-child th');
-      const stickyW = headers ? headers.offsetWidth : 88;
+      const stickyW = headers ? headers.offsetWidth : 76;
       const targetTh = headers[todayColIndex];
       if (targetTh) {
         scroller.scrollLeft = Math.max(0, targetTh.offsetLeft - stickyW);
       }
     }
+    isAppendingCols = false;
   }, 30);
+}
+
+// Проверка наступления нового утра (смены даты)
+function checkNewDayAndShift() {
+  const actualTodayKey = toDateKey(getTodayDate());
+  if (currentTodayKey && actualTodayKey !== currentTodayKey) {
+    showArchive = false;
+    const btn = document.getElementById('archiveBtn');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.textContent = 'АРХИВ';
+    }
+    renderTable(false);
+  }
+}
+
+// Бесконечная подгрузка будущих дат при прокрутке вправо
+function setupInfiniteScroll() {
+  const scroller = document.getElementById('scrollContainer');
+  if (!scroller) return;
+
+  scroller.addEventListener('scroll', () => {
+    if (isAppendingCols) return;
+    // Не перерисовываем во время активного набора текста в ячейке
+    if (document.activeElement && document.activeElement.isContentEditable) return;
+
+    const distanceToRight = scroller.scrollWidth - (scroller.scrollLeft + scroller.clientWidth);
+    if (distanceToRight < 450) {
+      isAppendingCols = true;
+      futureDaysLimit += 30;
+      renderTable(true);
+    }
+  });
 }
 
 function syncFromServer() {
@@ -271,9 +308,14 @@ function syncFromServer() {
 function initApp() {
   loadLocalStore();
   renderTable(false);
+  setupInfiniteScroll();
   syncFromServer();
 
+  // Каждую минуту проверяем, не наступил ли новый день (утро)
+  setInterval(checkNewDayAndShift, 60000);
+
   window.addEventListener('online', () => {
+    checkNewDayAndShift();
     syncFromServer();
   });
 
@@ -281,17 +323,27 @@ function initApp() {
     setStatus('Нет сети\nГрафик не обновляется', true);
   });
 
+  window.addEventListener('focus', () => {
+    checkNewDayAndShift();
+  });
+
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
+      checkNewDayAndShift();
       if (navigator.onLine) syncFromServer();
       else setStatus('Нет сети\nГрафик не обновляется', true);
     }
   });
 }
 
-
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', initApp);
 } else {
   initApp();
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
 }
