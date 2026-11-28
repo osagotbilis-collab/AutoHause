@@ -107,7 +107,6 @@
       width: max-content;
       font-size: 14px;
     }
-
     th, td {
       border-right: 1px solid #80868b;
       border-bottom: 1px solid #80868b;
@@ -193,7 +192,8 @@
     th.sunday-col .th-weekday { color: #5c3333; }
     th.sunday-col .th-date { color: #7d4e4e; }
     td.sunday-col,
-    td.off-hours-col {
+    td.off-hours-col,
+    td:first-child.off-hours-col {
       background-color: #f7ecec;
     }
 
@@ -286,6 +286,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
